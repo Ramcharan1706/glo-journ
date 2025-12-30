@@ -44,7 +44,7 @@ const ManagerDashboard = () => {
   const fetchData = async () => {
     try {
       const res = await apiClient.get("/applications");
-      setApplications(res.data);
+      setApplications(res.data.applications || []);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {

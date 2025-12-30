@@ -38,8 +38,17 @@ const getUsers = async (req, res) => {
 
     const total = await User.countDocuments(filter);
 
+    const formattedUsers = users.map((u) => ({
+      id: u._id,
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      isActive: u.isActive,
+      created_at: u.createdAt
+    }));
+
     res.json({
-      users,
+      users: formattedUsers,
       pagination: {
         page,
         limit,

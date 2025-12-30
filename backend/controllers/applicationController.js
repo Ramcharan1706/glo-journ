@@ -1,16 +1,57 @@
+const { validationResult } = require('express-validator');
 const Case = require('../models/Case');
 const User = require('../models/User');
+
+// Shape a Case document into the frontend contract
+const formatApplication = (caseDoc) => {
+  const documents = Array.isArray(caseDoc.documents)
+    ? caseDoc.documents.map((doc) => ({
+        id: doc._id?.toString?.() || String(doc),
+        file_name: doc.file_name,
+        document_type: doc.document_type,
+        status: doc.status,
+        uploaded_at: doc.createdAt,
+      }))
+    : [];
+
+  return {
+    id: caseDoc._id.toString(),
+    case_number: caseDoc.caseNumber,
+    client_id: caseDoc.client?._id?.toString() || null,
+    client_name: caseDoc.client?.name,
+    client_email: caseDoc.client?.email,
+    assigned_coordinator: caseDoc.assignedCoordinator?._id?.toString() || null,
+    assigned_manager: caseDoc.assignedManager?._id?.toString() || null,
+    status: caseDoc.status,
+    priority: caseDoc.priority,
+    personal_details: {
+      visa_type: caseDoc.visaType,
+      destination_country: caseDoc.applicationDetails?.destinationCountry,
+      purpose_of_visit: caseDoc.applicationDetails?.purposeOfVisit,
+      intended_date_of_entry: caseDoc.applicationDetails?.intendedDateOfEntry,
+      intended_length_of_stay: caseDoc.applicationDetails?.intendedLengthOfStay,
+      accommodation_details: caseDoc.applicationDetails?.accommodationDetails,
+      financial_info: caseDoc.applicationDetails?.financialInfo,
+    },
+    documents,
+    created_at: caseDoc.createdAt,
+    updated_at: caseDoc.updatedAt,
+  };
+};
 
 // Get all applications with role-based filtering
 const getApplications = async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const { status, priority, page = 1, limit = 10 } = req.query;
     const user = req.user;
 
-    // Build query based on user role
-    let query = {};
+    const query = {};
 
-    // Role-based filtering
     switch (user.role) {
       case 'client':
         query.client = user._id;
@@ -18,47 +59,46 @@ const getApplications = async (req, res) => {
       case 'coordinator':
         query.$or = [
           { assignedCoordinator: user._id },
-          { assignedCoordinator: { $exists: false } }
+          { assignedCoordinator: { $exists: false } },
         ];
         break;
       case 'manager':
         query.$or = [
           { assignedManager: user._id },
-          { assignedCoordinator: { $in: await getCoordinatorsUnderManager(user._id) } }
+          { assignedCoordinator: { $in: await getCoordinatorsUnderManager(user._id) } },
         ];
         break;
       case 'admin':
-        // Admin can see all applications
         break;
       default:
         return res.status(403).json({ message: 'Invalid user role' });
     }
 
-    // Apply filters
     if (status) query.status = status;
     if (priority) query.priority = priority;
 
-    // Pagination
-    const skip = (page - 1) * limit;
+    const numericLimit = Math.min(parseInt(limit, 10) || 10, 100);
+    const skip = (parseInt(page, 10) - 1) * numericLimit;
 
     const applications = await Case.find(query)
       .populate('client', 'name email')
       .populate('assignedCoordinator', 'name email')
       .populate('assignedManager', 'name email')
+      .populate('documents')
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(parseInt(limit));
+      .limit(numericLimit);
 
     const total = await Case.countDocuments(query);
 
     res.json({
-      applications,
+      applications: applications.map(formatApplication),
       pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
+        page: parseInt(page, 10),
+        limit: numericLimit,
         total,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / numericLimit),
+      },
     });
   } catch (error) {
     console.error('Get applications error:', error);
@@ -75,10 +115,10 @@ const getMyApplication = async (req, res) => {
       .populate('documents');
 
     if (!application) {
-      return res.status(404).json({ message: 'Application not found' });
+      return res.json({ application: null });
     }
 
-    res.json({ application });
+    res.json({ application: formatApplication(application) });
   } catch (error) {
     console.error('Get my application error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -88,6 +128,11 @@ const getMyApplication = async (req, res) => {
 // Create new application
 const createApplication = async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const { visaType, applicationDetails, priority = 'medium' } = req.body;
 
     // Check if user already has an application
@@ -101,7 +146,7 @@ const createApplication = async (req, res) => {
       visaType,
       applicationDetails,
       priority,
-      status: 'draft'
+      status: 'submitted'
     });
 
     await application.save();
@@ -111,7 +156,7 @@ const createApplication = async (req, res) => {
 
     res.status(201).json({
       message: 'Application created successfully',
-      application
+      application: formatApplication(application)
     });
   } catch (error) {
     console.error('Create application error:', error);
@@ -122,6 +167,11 @@ const createApplication = async (req, res) => {
 // Update application
 const updateApplication = async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const application = await Case.findById(req.params.id);
     if (!application) {
       return res.status(404).json({ message: 'Application not found' });
@@ -133,25 +183,21 @@ const updateApplication = async (req, res) => {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    const updateData = req.body;
-
-    // Update application
-    Object.keys(updateData).forEach(key => {
-      if (updateData[key] !== undefined) {
-        application[key] = updateData[key];
+    const allowedFields = ['visaType', 'applicationDetails', 'priority', 'status', 'assignedCoordinator', 'assignedManager'];
+    Object.entries(req.body).forEach(([key, value]) => {
+      if (allowedFields.includes(key) && value !== undefined) {
+        application[key] = value;
       }
     });
 
-    await application.save();
+    // Track who performed the update for timeline entries
+    application._updatedBy = req.user._id;
 
-    const updatedApplication = await Case.findById(req.params.id)
-      .populate('client', 'name email')
-      .populate('assignedCoordinator', 'name email')
-      .populate('assignedManager', 'name email');
+    await application.save();
 
     res.json({
       message: 'Application updated successfully',
-      application: updatedApplication
+      application: formatApplication(await application.populate(['client', 'assignedCoordinator', 'assignedManager', 'documents']))
     });
   } catch (error) {
     console.error('Update application error:', error);

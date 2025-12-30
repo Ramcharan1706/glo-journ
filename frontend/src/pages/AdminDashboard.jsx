@@ -43,7 +43,7 @@ const AdminDashboard = () => {
       setNewUser({ name: "", email: "", password: "", role: "coordinator" });
       fetchData(); // Refresh list
     } catch (error) {
-      toast.error(error.response?.data?.detail || "Failed to create user");
+      toast.error(error.response?.data?.message || "Failed to create user");
     } finally {
       setCreateLoading(false);
     }
@@ -57,8 +57,8 @@ const AdminDashboard = () => {
         apiClient.get("/sessions")
       ]);
       setStats(statsRes.data);
-      setUsers(usersRes.data);
-      setSessions(sessionsRes.data);
+      setUsers(usersRes.data.users || []);
+      setSessions(sessionsRes.data.sessions || []);
     } catch (error) {
       console.error("Error fetching data:", error);
       toast.error("Failed to load dashboard data");

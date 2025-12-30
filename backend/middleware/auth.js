@@ -12,7 +12,7 @@ const authenticateToken = async (req, res, next) => {
     }
 
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'change-me-in-production');
 
     // Get user from database
     const user = await User.findById(decoded.userId).select('-password');

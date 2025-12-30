@@ -1,0 +1,91 @@
+const { validationResult } = require('express-validator');
+const Document = require('../models/Document');
+const Case = require('../models/Case');
+
+// @desc    Upload a document
+// @route   POST /api/documents/upload
+// @access  Private
+exports.uploadDocument = async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ message: 'No file uploaded' });
+        }
+
+        const { application_id, document_type } = req.body;
+
+        // Check if application exists
+        const application = await Case.findById(application_id);
+        if (!application) {
+            return res.status(404).json({ message: 'Application not found' });
+        }
+
+        // Check permissions (owner or staff)
+        if (application.client.toString() !== req.user._id.toString() &&
+            !['admin', 'manager', 'coordinator'].includes(req.user.role)) {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+
+        // Create document record
+        const document = new Document({
+            file_name: req.file.originalname,
+            file_path: req.file.path,
+            file_type: req.file.mimetype,
+            document_type: document_type || 'client_upload',
+            uploaded_by: req.user._id,
+            application_id
+        });
+
+        await document.save();
+
+        // Add to application documents list
+        application.documents.push(document._id);
+        await application.save();
+
+        res.status(201).json({
+            message: 'Document uploaded successfully',
+            document
+        });
+    } catch (error) {
+        console.error('Upload document error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// @desc    Request a document from a client
+// @route   POST /api/document-requests
+// @access  Private (Manager, Admin, Coordinator)
+exports.requestDocument = async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const { application_id, document_type, message } = req.body;
+
+        const application = await Case.findById(application_id);
+        if (!application) {
+            return res.status(404).json({ message: 'Application not found' });
+        }
+
+        // Add note to case timeline/notes about the request
+        application.notes.push({
+            content: `Document Requested: ${document_type}. Message: ${message || 'No message'}`,
+            createdBy: req.user._id
+        });
+
+        // In a real app, send email notification here
+
+        await application.save();
+
+        res.json({ message: 'Document request sent successfully' });
+    } catch (error) {
+        console.error('Request document error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};

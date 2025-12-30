@@ -1,14 +1,14 @@
 const express = require('express');
-const { getAdminStats } = require('../controllers/adminController');
-const { authenticateToken, requireAdminOrManagerOrCoordinator } = require('../middleware/auth');
+const { getStats } = require('../controllers/adminController');
+const { authenticateToken, requireRole } = require('../middleware/auth');
 
 const router = express.Router();
 
 // All routes require authentication and admin/manager/coordinator access
 router.use(authenticateToken);
-router.use(requireAdminOrManagerOrCoordinator);
+router.use(requireRole('admin', 'manager', 'coordinator'));
 
 // Get admin statistics
-router.get('/stats', getAdminStats);
+router.get('/stats', getStats);
 
 module.exports = router;

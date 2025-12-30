@@ -32,10 +32,10 @@ const CoordinatorDashboard = () => {
     try {
       const [appsRes, managersRes] = await Promise.all([
         apiClient.get("/applications"),
-        apiClient.get("/users/managers")
+        apiClient.get("/users?role=manager")
       ]);
-      setApplications(appsRes.data);
-      setManagers(managersRes.data);
+      setApplications(appsRes.data.applications || []);
+      setManagers(managersRes.data.users || []);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -60,7 +60,7 @@ const CoordinatorDashboard = () => {
       setSelectedManager("");
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || "Failed to assign");
+      toast.error(error.response?.data?.message || "Failed to assign");
     } finally {
       setAssigning(false);
     }

@@ -1,10 +1,16 @@
+const { validationResult } = require('express-validator');
 const Case = require('../models/Case');
 const User = require('../models/User');
 
 // Assign application to coordinator
 const assignApplication = async (req, res) => {
   try {
-    const { application_id, coordinator_id } = req.body;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { application_id, manager_id } = req.body;
 
     // Verify the application exists
     const application = await Case.findById(application_id);
@@ -12,25 +18,25 @@ const assignApplication = async (req, res) => {
       return res.status(404).json({ message: 'Application not found' });
     }
 
-    // Check permissions - only managers and admins can assign coordinators
+    // Check permissions - only managers and admins can assign managers
     if (!['admin', 'manager'].includes(req.user.role)) {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    // Verify coordinator exists and has coordinator role
-    if (coordinator_id) {
-      const coordinator = await User.findById(coordinator_id);
-      if (!coordinator || coordinator.role !== 'coordinator') {
-        return res.status(404).json({ message: 'Coordinator not found' });
+    // Verify manager exists and has manager role
+    if (manager_id) {
+      const manager = await User.findById(manager_id);
+      if (!manager || manager.role !== 'manager') {
+        return res.status(404).json({ message: 'Manager not found' });
       }
     }
 
     // Update assignment
-    application.assignedCoordinator = coordinator_id || null;
+    application.assignedManager = manager_id || null;
     await application.save();
 
     // Populate the response
-    await application.populate('assignedCoordinator', 'name email');
+    await application.populate('assignedManager', 'name email');
 
     res.json({
       message: 'Application assigned successfully',

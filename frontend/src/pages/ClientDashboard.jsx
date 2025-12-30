@@ -28,7 +28,7 @@ const ClientDashboard = () => {
       // Using /applications for now and finding the user's application matching their email or id
       // Ideally the backend provides a direct endpoint for "my application"
       const res = await apiClient.get("/applications/my-application");
-      setApplication(res.data);
+      setApplication(res.data.application);
     } catch (error) {
       if (error.response?.status === 404) {
         setApplication(null); // No application yet

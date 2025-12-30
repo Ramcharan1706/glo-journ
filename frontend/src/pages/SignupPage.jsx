@@ -49,7 +49,7 @@ const SignupPage = () => {
           userData.role === "manager" ? "/manager" : "/admin";
       navigate(path);
     } catch (error) {
-      toast.error(error.response?.data?.detail || "Signup failed");
+      toast.error(error.response?.data?.message || "Signup failed");
     } finally {
       setLoading(false);
     }

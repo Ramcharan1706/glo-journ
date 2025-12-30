@@ -26,7 +26,7 @@ const caseSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['draft', 'submitted', 'under_review', 'approved', 'rejected', 'completed'],
+    enum: ['draft', 'submitted', 'under_review', 'processing', 'approved', 'rejected', 'completed'],
     default: 'draft'
   },
   priority: {

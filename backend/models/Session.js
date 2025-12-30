@@ -9,7 +9,7 @@ const sessionSchema = new mongoose.Schema({
   coordinator: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false
   },
   date: {
     type: String, // YYYY-MM-DD format
@@ -21,8 +21,8 @@ const sessionSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['scheduled', 'completed', 'cancelled', 'no_show'],
-    default: 'scheduled'
+    enum: ['pending', 'confirmed', 'completed', 'cancelled'],
+    default: 'pending'
   },
   notes: {
     type: String

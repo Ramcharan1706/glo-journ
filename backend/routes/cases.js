@@ -33,7 +33,7 @@ const caseValidation = [
 const updateCaseValidation = [
   body('status')
     .optional()
-    .isIn(['draft', 'submitted', 'under_review', 'approved', 'rejected', 'completed'])
+    .isIn(['draft', 'submitted', 'under_review', 'processing', 'approved', 'rejected', 'completed'])
     .withMessage('Invalid status'),
   body('priority')
     .optional()
@@ -53,7 +53,7 @@ const updateCaseValidation = [
 router.get('/', [
   query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
   query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
-  query('status').optional().isIn(['draft', 'submitted', 'under_review', 'approved', 'rejected', 'completed']).withMessage('Invalid status'),
+  query('status').optional().isIn(['draft', 'submitted', 'under_review', 'processing', 'approved', 'rejected', 'completed']).withMessage('Invalid status'),
   query('priority').optional().isIn(['low', 'medium', 'high', 'urgent']).withMessage('Invalid priority'),
   query('assignedTo').optional().isIn(['me']).withMessage('Invalid assignedTo value')
 ], getCases);
