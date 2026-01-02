@@ -28,6 +28,13 @@ const formatApplication = (caseDoc) => {
       }))
     : [];
 
+  const intake = caseDoc.intakeForm || {};
+  const general = intake.generalInformation || {};
+  const immigration = intake.immigrationHistory || {};
+  const passport = intake.passportInformation || {};
+  const educationEmployment = intake.educationEmployment || {};
+  const address = general.address || {};
+
   return {
     id: caseDoc._id.toString(),
     case_number: caseDoc.caseNumber,
@@ -46,8 +53,35 @@ const formatApplication = (caseDoc) => {
       intended_length_of_stay: caseDoc.applicationDetails?.intendedLengthOfStay,
       accommodation_details: caseDoc.applicationDetails?.accommodationDetails,
       financial_info: caseDoc.applicationDetails?.financialInfo,
+      full_name: general.fullLegalName,
+      other_names: general.otherNames,
+      date_of_birth: general.dateOfBirth,
+      birth_place: general.birthCityCountry,
+      citizenship: general.citizenshipCountries,
+      gender: general.gender,
+      marital_status: general.maritalStatus,
+      address: [address.city, address.state, address.zip, address.country]
+        .filter(Boolean)
+        .join(', '),
+      phone_mobile: general.phoneMobile,
+      phone_other: general.phoneOther,
+      preferred_contact_method: general.preferredContactMethod,
+      immigration_status: immigration.currentStatus,
+      last_entry_date: immigration.lastEntryDate,
+      last_entry_place: immigration.lastEntryPlace,
+      manner_of_last_entry: immigration.mannerOfLastEntry,
+      class_of_admission: immigration.classOfAdmission,
+      i94_number: immigration.i94Number,
+      passport_country: passport.passportCountry,
+      passport_number: passport.passportNumber,
+      passport_issue_date: passport.issuedDate,
+      passport_expiration_date: passport.expirationDate,
+      passport_place_of_issue: passport.placeOfIssue,
+      alien_number: passport.alienNumber,
+      ssn: passport.ssn,
+      highest_education: educationEmployment.highestEducation,
     },
-    intake_form: caseDoc.intakeForm || null,
+    intake_form: intake || null,
     documents,
     created_at: caseDoc.createdAt,
     updated_at: caseDoc.updatedAt,
