@@ -1,0 +1,102 @@
+/* Navbar.css */
+header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    transition: background-color 0.3s ease, padding 0.3s ease;
+    padding: 1.5rem 0;
+}
+
+header.scrolled {
+    background-color: rgba(11, 19, 43, 0.95);
+    padding: 1rem 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
+    max-width: var(--container-width);
+    margin: 0 auto;
+}
+
+.logo {
+    color: var(--pure-white);
+    font-family: var(--font-head);
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    text-decoration: none;
+}
+
+.logo span {
+    color: var(--accent-gold);
+}
+
+nav ul {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+nav a {
+    color: var(--pure-white);
+    font-size: 0.9rem;
+    position: relative;
+    text-decoration: none;
+    font-family: var(--font-body);
+}
+
+nav a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -5px;
+    left: 0;
+    background-color: var(--accent-gold);
+    transition: width 0.3s;
+}
+
+nav a:hover::after {
+    width: 100%;
+}
+
+.mobile-toggle {
+    display: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .mobile-toggle {
+        display: block;
+    }
+
+    nav ul {
+        position: fixed;
+        top: 70px;
+        right: -100%;
+        width: 80%;
+        height: calc(100vh - 70px);
+        background: var(--primary-navy);
+        flex-direction: column;
+        justify-content: center;
+        transition: right 0.3s ease;
+        padding: 2rem;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.2);
+    }
+
+    nav ul.active {
+        right: 0;
+    }
+}

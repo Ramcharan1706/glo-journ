@@ -1,11 +1,8 @@
-// LandingPage.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  List,
-  X,
   GoogleLogo,
   AmazonLogo,
   SlackLogo,
@@ -14,13 +11,7 @@ import {
   Briefcase,
   GlobeHemisphereWest,
   HouseLine,
-  Star,
-  LinkedinLogo,
-  TwitterLogo,
-  InstagramLogo,
-  Phone,
-  Envelope,
-  MapPin
+  Star
 } from "@phosphor-icons/react";
 import {
   Carousel,
@@ -30,6 +21,8 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import "./LandingPage.css";
 
 /**
@@ -46,11 +39,11 @@ const LandingPage = () => {
   const navigate = useNavigate();
 
   // UI state
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // const [isScrolled, setIsScrolled] = useState(false); // Moved to Navbar
+  // const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // Moved to Navbar
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  
+
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
@@ -64,15 +57,12 @@ const LandingPage = () => {
     }
   }, [user, navigate]);
 
-
-
-
   // Scroll + parallax + progress
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      // setIsScrolled(window.scrollY > 50); // Handled in Navbar
 
       const scrollTop = document.documentElement.scrollTop;
       const height = document.documentElement.scrollHeight - document.documentElement.clientHeight || 1;
@@ -119,43 +109,11 @@ const LandingPage = () => {
         <title>GloJourn - Unlock Your Global Journey</title>
         <meta name="description" content="Expert immigration consulting for visas, corporate relocation, and citizenship strategies. Trust GloJourn to navigate your path abroad." />
       </Helmet>
+
       {/* Scroll progress indicator */}
       <div id="scroll-progress" style={{ width: `${scrollProgress}%` }} aria-hidden="true" />
 
-
-      {/* Header */}
-      <header id="main-header" className={isScrolled ? "scrolled" : ""} role="banner">
-        <div className="nav-container">
-          <a href="#" className="logo" aria-label="GloJourn Home">Glo<span>Journ</span></a>
-
-          <div
-            className="mobile-toggle"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-controls="navLinks"
-            aria-expanded={mobileMenuOpen}
-            aria-label={mobileMenuOpen ? "Close navigation" : "Open navigation"}
-          >
-            {mobileMenuOpen ? <X size={24} /> : <List size={24} />}
-          </div>
-
-          <nav role="navigation" aria-label="Primary">
-            <ul id="navLinks" className={mobileMenuOpen ? "active" : ""}>
-              <li><a href="#services" onClick={() => setMobileMenuOpen(false)}>Services</a></li>
-              <li><a href="#clients" onClick={() => setMobileMenuOpen(false)}>Our Clients</a></li>
-              <li><a href="#testimonials" onClick={() => setMobileMenuOpen(false)}>Stories</a></li>
-              <li><a href="#contact" onClick={() => setMobileMenuOpen(false)}>Contact</a></li>
-              <li>
-                <button
-                  className="btn-custom btn-outline-custom"
-                  onClick={() => navigate("/login")}
-                >
-                  Client Portal
-                </button>
-              </li>
-            </ul>
-          </nav>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Hero */}
       <section className="hero" aria-labelledby="hero-heading">
@@ -202,7 +160,7 @@ const LandingPage = () => {
                 <li>Student & Graduate Visas</li>
                 <li>Family Reunification</li>
               </ul>
-              <a href="#" className="learn-more">Explore Visas →</a>
+              <a onClick={() => navigate("/services")} className="learn-more cursor-pointer">Explore Visas →</a>
             </article>
 
             <article className="service-card reveal-on-scroll" style={{ transitionDelay: "100ms" }}>
@@ -213,7 +171,7 @@ const LandingPage = () => {
                 <li>Compliance Audits</li>
                 <li>Talent Acquisition Support</li>
               </ul>
-              <a href="#" className="learn-more">For Businesses →</a>
+              <a onClick={() => navigate("/services")} className="learn-more cursor-pointer">For Businesses →</a>
             </article>
 
             <article className="service-card reveal-on-scroll" style={{ transitionDelay: "200ms" }}>
@@ -224,7 +182,7 @@ const LandingPage = () => {
                 <li>Dual Nationality Planning</li>
                 <li>Residency by Investment</li>
               </ul>
-              <a href="#" className="learn-more">Secure Future →</a>
+              <a onClick={() => navigate("/services")} className="learn-more cursor-pointer">Secure Future →</a>
             </article>
 
             <article className="service-card reveal-on-scroll" style={{ transitionDelay: "300ms" }}>
@@ -235,7 +193,7 @@ const LandingPage = () => {
                 <li>School Search</li>
                 <li>Banking & Healthcare Setup</li>
               </ul>
-              <a href="/login" className="learn-more">Settle In →</a>
+              <a onClick={() => navigate("/services")} className="learn-more cursor-pointer">Settle In →</a>
             </article>
           </div>
 
@@ -327,61 +285,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Footer / Contact */}
-      <footer id="contact" role="contentinfo" aria-labelledby="footer-heading">
-        <div className="container-custom">
-          <div className="footer-grid">
-            <div className="footer-col">
-              <a href="#" className="logo" style={{ fontSize: "1.5rem", display: "block", marginBottom: "1rem" }}>Glo<span>Journ</span></a>
-              <p style={{ marginBottom: "1rem", color: "#aaa" }}>
-                Empowering global citizens since 2005. We turn borders into bridges with ethical, expert immigration consulting.
-              </p>
-              <div style={{ display: "flex", gap: "1rem", fontSize: "1.5rem" }}>
-                <a href="#" aria-label="LinkedIn"><LinkedinLogo /></a>
-                <a href="#" aria-label="Twitter"><TwitterLogo /></a>
-                <a href="#" aria-label="Instagram"><InstagramLogo /></a>
-              </div>
-            </div>
-
-            <div className="footer-col">
-              <h4>Quick Links</h4>
-              <ul className="footer-links">
-                <li><a href="#">About Us</a></li>
-                <li><a href="#">Our Services</a></li>
-                <li><a href="#">Blog & Insights</a></li>
-                <li><a href="#">Careers</a></li>
-              </ul>
-            </div>
-
-            <div className="footer-col">
-              <h4>Contact</h4>
-              <ul className="footer-links">
-                <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Phone /> +1 (555) 123-4567</li>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Envelope /> info@glojourn.com</li>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><MapPin /> 101 Global Ave, NY</li>
-              </ul>
-            </div>
-
-            <div className="footer-col">
-              <h4>Regulatory</h4>
-              <ul className="footer-links">
-                <li><a onClick={() => navigate("/disclaimer")} className="cursor-pointer">Legal Disclaimer</a></li>
-                <li><a onClick={() => navigate("/privacy-policy")} className="cursor-pointer">Privacy Policy</a></li>
-                <li><a onClick={() => navigate("/terms-of-service")} className="cursor-pointer">Terms of Service</a></li>
-                <li><a onClick={() => navigate("/login")} className="cursor-pointer">Sitemap</a></li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="mt-12 py-6 border-t border-white/5 text-center text-[10px] text-gray-500 uppercase tracking-widest reveal-on-scroll">
-            <p>GloJourn is an immigration consulting firm. We provide informational and case management services. We are not a law firm and do not provide legal advice. All services are subject to our terms and conditions.</p>
-          </div>
-
-          <div className="copyright">
-            <p>&copy; 2025 GloJourn Inc. All Rights Reserved. | <span className="cursor-pointer hover:text-white" onClick={() => navigate("/privacy-policy")}>Privacy Policy</span> | <span className="cursor-pointer hover:text-white" onClick={() => navigate("/terms-of-service")}>Terms of Service</span></p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </>
   );
 };

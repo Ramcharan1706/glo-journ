@@ -16,82 +16,6 @@
 }
 
 /* * =========================================
- * HEADER & NAV
- * =========================================
- */
-header {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 1000;
-    transition: background-color 0.3s ease, padding 0.3s ease;
-    padding: 1.5rem 0;
-}
-
-header.scrolled {
-    background-color: rgba(11, 19, 43, 0.95);
-    padding: 1rem 0;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-}
-
-.nav-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 90%;
-    max-width: var(--container-width);
-    margin: 0 auto;
-}
-
-.logo {
-    color: var(--pure-white);
-    font-family: var(--font-head);
-    font-size: 1.8rem;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-}
-
-.logo span {
-    color: var(--accent-gold);
-}
-
-nav ul {
-    display: flex;
-    list-style: none;
-    gap: 2rem;
-    align-items: center;
-}
-
-nav a {
-    color: var(--pure-white);
-    font-size: 0.9rem;
-    position: relative;
-}
-
-nav a::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: -5px;
-    left: 0;
-    background-color: var(--accent-gold);
-    transition: width 0.3s;
-}
-
-nav a:hover::after {
-    width: 100%;
-}
-
-.mobile-toggle {
-    display: none;
-    color: white;
-    font-size: 1.5rem;
-    cursor: pointer;
-}
-
-/* * =========================================
  * HERO SECTION
  * =========================================
  */
@@ -371,64 +295,6 @@ nav a:hover::after {
 }
 
 /* * =========================================
- * FOOTER
- * =========================================
- */
-footer {
-    background-color: var(--primary-navy);
-    color: #aaa;
-    padding: 4rem 0 1rem;
-    font-size: 0.9rem;
-}
-
-.footer-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1.5fr;
-    gap: 2rem;
-    margin-bottom: 3rem;
-}
-
-.footer-col h4 {
-    color: var(--pure-white);
-    margin-bottom: 1.5rem;
-    font-family: var(--font-body);
-}
-
-.footer-links li {
-    list-style: none;
-    margin-bottom: 0.8rem;
-}
-
-.footer-links a {
-    color: #aaa;
-    transition: color 0.3s;
-}
-
-.footer-links a:hover {
-    color: var(--accent-gold);
-    padding-left: 5px;
-}
-
-.newsletter-form {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.newsletter-form input {
-    padding: 0.8rem;
-    border: 1px solid #333;
-    background: var(--primary-navy);
-    color: white;
-    flex: 1;
-}
-
-.copyright {
-    text-align: center;
-    padding-top: 2rem;
-    border-top: 1px solid #1a2a3a;
-}
-
-/* * =========================================
  * MODAL (Login/Signup)
  * =========================================
  */
@@ -525,41 +391,12 @@ footer {
  * =========================================
  */
 @media (max-width: 900px) {
-    .footer-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-
     .hero-content {
         margin-top: 3rem;
     }
 }
 
 @media (max-width: 768px) {
-    .mobile-toggle {
-        display: block;
-    }
-
-    nav ul {
-        position: fixed;
-        top: 70px;
-        right: -100%;
-        width: 80%;
-        height: 100vh;
-        background: var(--primary-navy);
-        flex-direction: column;
-        justify-content: center;
-        transition: right 0.3s ease;
-        padding: 2rem;
-    }
-
-    nav ul.active {
-        right: 0;
-    }
-
-    .footer-grid {
-        grid-template-columns: 1fr;
-    }
-
     h1 {
         font-size: 2.5rem;
     }
