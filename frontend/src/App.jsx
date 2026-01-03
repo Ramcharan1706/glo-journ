@@ -19,6 +19,7 @@ const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
 const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("@/pages/TermsOfService"));
 const DisclaimerPage = lazy(() => import("@/pages/DisclaimerPage"));
+const ServicesPage = lazy(() => import("@/pages/ServicesPage"));
 
 // Loading Component
 const PageLoader = () => (
@@ -83,6 +84,7 @@ function App() {
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />
               <Route path="/disclaimer" element={<DisclaimerPage />} />
+              <Route path="/services" element={<ServicesPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
