@@ -16,9 +16,9 @@ const getUsers = async (req, res) => {
 
     // Role-based filtering
     if (req.user.role === 'coordinator') {
-      // Coordinators can only see clients and themselves
+      // Coordinators can see clients, managers, and themselves
       filter.$or = [
-        { role: 'client' },
+        { role: { $in: ['client', 'manager'] } },
         { _id: req.user._id }
       ];
     } else if (req.user.role === 'manager') {
@@ -74,7 +74,7 @@ const getUser = async (req, res) => {
     }
 
     // Check permissions
-    if (req.user.role === 'coordinator' && user.role !== 'client' && user._id.toString() !== req.user._id.toString()) {
+    if (req.user.role === 'coordinator' && !['client', 'manager'].includes(user.role) && user._id.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Access denied' });
     }
 
@@ -101,7 +101,7 @@ const updateUser = async (req, res) => {
     }
 
     // Check permissions
-    if (req.user.role === 'coordinator' && user.role !== 'client' && user._id.toString() !== req.user._id.toString()) {
+    if (req.user.role === 'coordinator' && !['client', 'manager'].includes(user.role) && user._id.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Access denied' });
     }
 
@@ -158,7 +158,7 @@ const toggleUserStatus = async (req, res) => {
     }
 
     // Check permissions
-    if (req.user.role === 'coordinator' && user.role !== 'client') {
+    if (req.user.role === 'coordinator' && !['client', 'manager'].includes(user.role)) {
       return res.status(403).json({ message: 'Access denied' });
     }
 

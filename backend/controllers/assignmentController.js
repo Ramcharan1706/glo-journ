@@ -40,6 +40,11 @@ const assignApplication = async (req, res) => {
     // Update assignment
     application.assignedManager = manager_id || null;
 
+    // Set status to under_review when assigning
+    if (manager_id) {
+      application.status = 'under_review';
+    }
+
     // Add to timeline for auditing
     if (manager_id) {
       application.timeline.push({
