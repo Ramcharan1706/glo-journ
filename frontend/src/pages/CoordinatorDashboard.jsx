@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Label } from "@/components/ui/label";
 import {
-  Globe, LayoutDashboard, Users, FileText, LogOut, Loader2, User, UserPlus, Eye, CheckCircle2, FileCheck, Send
+  Globe, LayoutDashboard, Users, FileText, LogOut, Loader2, User, UserPlus, Eye, CheckCircle2, FileCheck, Send, TrendingUp
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -33,6 +33,11 @@ const CoordinatorDashboard = () => {
   const [requestDocType, setRequestDocType] = useState("");
   const [requestMessage, setRequestMessage] = useState("");
   const [sendingRequest, setSendingRequest] = useState(false);
+
+  // Status Update State
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+  const [newStatus, setNewStatus] = useState("");
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -97,6 +102,21 @@ const CoordinatorDashboard = () => {
       toast.error("Failed to send request");
     } finally {
       setSendingRequest(false);
+    }
+  };
+
+  const handleUpdateStatus = async () => {
+    if (!selectedApp || !newStatus) return;
+    setUpdatingStatus(true);
+    try {
+      await apiClient.put(`/applications/${selectedApp.id}`, { status: newStatus });
+      toast.success("Status updated successfully");
+      setStatusDialogOpen(false);
+      fetchData();
+    } catch (error) {
+      toast.error("Failed to update status");
+    } finally {
+      setUpdatingStatus(false);
     }
   };
 
@@ -298,6 +318,21 @@ const CoordinatorDashboard = () => {
                           >
                             <Send className="w-4 h-4" />
                           </Button>
+
+                          {/* Update Status Button */}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-purple-600 border-purple-200 hover:bg-purple-50"
+                            onClick={() => {
+                              setSelectedApp(app);
+                              setNewStatus(app.status);
+                              setStatusDialogOpen(true);
+                            }}
+                            data-testid={`update-status-btn-${app.id}`}
+                          >
+                            <TrendingUp className="w-4 h-4" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -329,6 +364,7 @@ const CoordinatorDashboard = () => {
                     <TableHead>Assigned Manager</TableHead>
                     <TableHead>Documents</TableHead>
                     <TableHead>Last Updated</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -349,6 +385,21 @@ const CoordinatorDashboard = () => {
                       </TableCell>
                       <TableCell>{app.documents?.length || 0}</TableCell>
                       <TableCell>{new Date(app.updated_at).toLocaleDateString()}</TableCell>
+                      <TableCell>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-purple-600 border-purple-200 hover:bg-purple-50"
+                          onClick={() => {
+                            setSelectedApp(app);
+                            setNewStatus(app.status);
+                            setStatusDialogOpen(true);
+                          }}
+                          data-testid={`update-status-btn-${app.id}`}
+                        >
+                          <TrendingUp className="w-4 h-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -548,6 +599,46 @@ const CoordinatorDashboard = () => {
               >
                 {sendingRequest ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                 Send
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Status Update Dialog */}
+        <Dialog open={statusDialogOpen} onOpenChange={(open) => {
+          setStatusDialogOpen(open);
+          if (!open) {
+            setSelectedApp(null);
+            setNewStatus("");
+          }
+        }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Update Status</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Select Status</Label>
+                <Select value={newStatus} onValueChange={setNewStatus}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="submitted">Submitted</SelectItem>
+                    <SelectItem value="under_review">Under Review</SelectItem>
+                    <SelectItem value="processing">Processing</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                className="w-full bg-purple-600 hover:bg-purple-700"
+                onClick={handleUpdateStatus}
+                disabled={updatingStatus || !newStatus}
+                data-testid="confirm-update-status-btn"
+              >
+                {updatingStatus ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Update Status"}
               </Button>
             </div>
           </DialogContent>
